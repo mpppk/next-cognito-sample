@@ -1,0 +1,9 @@
+node_modules
+.next
+coverage
+.idea
+out
+*.cache
+.env
+cypress/screenshots/
+.DS_Store
