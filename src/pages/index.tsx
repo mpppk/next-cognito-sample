@@ -1,30 +1,40 @@
-import Typography from '@material-ui/core/Typography/Typography';
 import { NextPage } from 'next';
 import React from 'react';
-import { Counter } from "../features/counter/Counter";
-import { useActions, useAppSelector } from "../hooks";
-import { counterSlice, incrementLater, selectCount } from "../features/counter/counterSlice";
+// import { useActions, useAppSelector } from "../hooks";
+// import { counterSlice, incrementLater, selectCount } from "../features/counter/counterSlice";
+import { AuthState, onAuthUIStateChange } from '@aws-amplify/ui-components';
+import { User } from '../models/models';
+import { awsconfig } from '../awsconfig';
+import { AmplifyAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
+import { Amplify } from '@aws-amplify/core';
+
+Amplify.configure(awsconfig);
 
 // tslint:disable-next-line variable-name
 export const Index: NextPage = () => {
-  const handlers = useActions({
-    ...counterSlice.actions,
-    incrementLater,
-  });
-  const count = useAppSelector(selectCount);
+  // const handlers = useActions({
+  //   ...counterSlice.actions,
+  //   incrementLater,
+  // });
+  // const count = useAppSelector(selectCount);
 
-  return (
-    <div>
-      <Typography variant="h2" gutterBottom={true}>
-        Counter sample
-      </Typography>
-      <Counter
-        count={count}
-        onClickIncrementButton={handlers.increment}
-        onClickDecrementButton={handlers.decrement}
-        onClickIncrementLaterButton={handlers.incrementLater}
-      />
+  const [authState, setAuthState] = React.useState<AuthState>();
+  const [user, setUser] = React.useState<User | undefined>();
+
+  React.useEffect(() => {
+    return onAuthUIStateChange((nextAuthState, authData) => {
+      setAuthState(nextAuthState);
+      setUser(authData as User | undefined);
+    });
+  }, []);
+
+  return authState === AuthState.SignedIn && user ? (
+    <div className="App">
+      <div>Hello, {user.username}</div>
+      <AmplifySignOut />
     </div>
+  ) : (
+    <AmplifyAuthenticator />
   );
 };
 

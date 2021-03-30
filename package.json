@@ -14,11 +14,14 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@aws-amplify/auth": "3.4.29",
+    "@aws-amplify/ui-react": "1.0.6",
     "@material-ui/core": "4.11.3",
     "@material-ui/icons": "4.11.2",
     "@material-ui/styles": "4.11.3",
     "@reduxjs/toolkit": "1.5.1",
     "@zeit/next-typescript": "1.1.1",
+    "aws-amplify": "3.3.26",
     "dotenv": "8.2.0",
     "next": "10.0.9",
     "next-redux-wrapper": "6.0.2",
