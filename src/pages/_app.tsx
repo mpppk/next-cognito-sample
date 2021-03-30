@@ -3,42 +3,46 @@ import CssBaseline from '@material-ui/core/CssBaseline/CssBaseline';
 import ThemeProvider from '@material-ui/styles/ThemeProvider';
 import { AppProps } from 'next/app';
 import React, { FC } from 'react';
-import {MyAppBar} from '../components/AppBar';
+import { MyAppBar } from '../components/AppBar';
 import { wrapper } from '../store';
 import theme from '../theme';
-import { User } from "../models/models";
+import { makeStyles } from '@material-ui/core/styles';
 
-const useHandlers = () => {
-  return {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    logout: () => {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    empty: () => {}
-  };
-};
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+  },
+  appBarSpacer: theme.mixins.toolbar,
+  content: {
+    flexGrow: 1,
+    height: '100vh',
+    overflow: 'auto',
+  },
+  container: {
+    paddingTop: theme.spacing(4),
+    paddingBottom: theme.spacing(4),
+  },
+}));
 
 // tslint:disable-next-line variable-name
-const WrappedApp: FC<AppProps> = ({Component, pageProps}) => {
-  const handlers = useHandlers();
-  // const user = useSelector((state: State) => {
-  //   return state.global.user
-  // });
-  const dummyUser: User = {
-    uid: 'abc',
-    displayName: 'dummy-user',
-    photoURL: 'photo-url',
-
-  };
+const WrappedApp: FC<AppProps> = ({ Component, pageProps }) => {
+  const classes = useStyles();
   return (
     <ThemeProvider theme={theme}>
-      {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-      <CssBaseline />
-      <MyAppBar user={dummyUser} onClickLogout={handlers.logout} />
-      <Container>
-        <Component {...pageProps} />
-      </Container>
+      <div className={classes.root}>
+        {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+        <CssBaseline />
+        <MyAppBar />
+
+        <main className={classes.content}>
+          <div className={classes.appBarSpacer} />
+          <Container maxWidth="lg" className={classes.container}>
+            <Component {...pageProps} />
+          </Container>
+        </main>
+      </div>
     </ThemeProvider>
   );
-}
+};
 
-export default wrapper.withRedux(WrappedApp)
+export default wrapper.withRedux(WrappedApp);
