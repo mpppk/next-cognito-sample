@@ -7,6 +7,7 @@ import { MyAppBar } from '../components/AppBar';
 import { wrapper } from '../store';
 import theme from '../theme';
 import { makeStyles } from '@material-ui/core/styles';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,24 +25,28 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const queryClient = new QueryClient();
+
 // tslint:disable-next-line variable-name
 const WrappedApp: FC<AppProps> = ({ Component, pageProps }) => {
   const classes = useStyles();
   return (
-    <ThemeProvider theme={theme}>
-      <div className={classes.root}>
-        {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-        <CssBaseline />
-        <MyAppBar />
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <div className={classes.root}>
+          {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+          <CssBaseline />
+          <MyAppBar />
 
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth="lg" className={classes.container}>
-            <Component {...pageProps} />
-          </Container>
-        </main>
-      </div>
-    </ThemeProvider>
+          <main className={classes.content}>
+            <div className={classes.appBarSpacer} />
+            <Container maxWidth="lg" className={classes.container}>
+              <Component {...pageProps} />
+            </Container>
+          </main>
+        </div>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 
