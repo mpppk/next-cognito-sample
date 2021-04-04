@@ -7,6 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Title from './Title';
+import { Skeleton } from '@material-ui/lab';
 
 function preventDefault(
   event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
@@ -30,13 +31,26 @@ export interface Order {
 }
 
 interface OrdersProps {
+  loading: boolean;
   orders: Order[];
 }
 
 export const Orders: React.FC<OrdersProps> = (props) => {
   const classes = useStyles();
+  if (props.loading) {
+    return (
+      <>
+        <Title>Recent Orders</Title>
+        <Skeleton />
+        <Skeleton />
+        <Skeleton />
+        <Skeleton />
+        <Skeleton />
+      </>
+    );
+  }
   return (
-    <React.Fragment>
+    <>
       <Title>Recent Orders</Title>
       <Table size="small">
         <TableHead>
@@ -65,6 +79,6 @@ export const Orders: React.FC<OrdersProps> = (props) => {
           See more orders
         </Link>
       </div>
-    </React.Fragment>
+    </>
   );
 };

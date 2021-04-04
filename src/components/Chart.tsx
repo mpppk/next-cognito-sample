@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import Title from './Title';
+import Skeleton from '@material-ui/lab/Skeleton';
 
 export interface ChartData {
   time: string;
@@ -17,10 +18,22 @@ export interface ChartData {
 
 interface ChartProps {
   data: ChartData[];
+  loading: boolean;
 }
 
 export const Chart: React.FC<ChartProps> = (props) => {
   const theme = useTheme();
+
+  if (props.loading) {
+    return (
+      <>
+        <Title>Today</Title>
+        <ResponsiveContainer>
+          <Skeleton variant="rect" />
+        </ResponsiveContainer>
+      </>
+    );
+  }
 
   return (
     <React.Fragment>

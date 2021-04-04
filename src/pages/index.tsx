@@ -6,19 +6,17 @@ import { awsconfig } from '../awsconfig';
 import { AmplifyAuthenticator } from '@aws-amplify/ui-react';
 import { Amplify } from '@aws-amplify/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Box, Grid, Paper } from '@material-ui/core';
+import { Box, Grid, LinearProgress, Paper } from '@material-ui/core';
 import { Deposits } from '../components/Deposits';
 import { Orders } from '../components/Orders';
 import { Copyright } from '@material-ui/icons';
 import clsx from 'clsx';
-import { Chart, ChartData } from '../components/Chart';
+import { Chart } from '../components/Chart';
+import { useQuery } from 'react-query';
+import { DashBoardApiResponse } from './api/dashboard';
+import { sleep } from '../util';
 
 Amplify.configure(awsconfig);
-
-// Generate Sales Data
-function createData(time: string, amount: number | undefined) {
-  return { time, amount };
-}
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -30,83 +28,42 @@ const useStyles = makeStyles((theme) => ({
   fixedHeight: {
     height: 240,
   },
+  loading: {
+    height: 10,
+  },
 }));
 
-const chartData: ChartData[] = [
-  createData('00:00', 0),
-  createData('03:00', 300),
-  createData('06:00', 600),
-  createData('09:00', 800),
-  createData('12:00', 1500),
-  createData('15:00', 2000),
-  createData('18:00', 2400),
-  createData('21:00', 2400),
-  createData('24:00', undefined),
-];
-
-const deposits = { amount: 3024, date: '15 March, 2019' };
-
-// Generate Order Data
-function createOrder(
-  id: number,
-  date: string,
-  name: string,
-  shipTo: string,
-  paymentMethod: string,
-  amount: number
-) {
-  return { id, date, name, shipTo, paymentMethod, amount };
+interface ProgressProps {
+  loading: boolean;
 }
 
-const orders = [
-  createOrder(
-    0,
-    '16 Mar, 2019',
-    'Elvis Presley',
-    'Tupelo, MS',
-    'VISA ⠀•••• 3719',
-    312.44
-  ),
-  createOrder(
-    1,
-    '16 Mar, 2019',
-    'Paul McCartney',
-    'London, UK',
-    'VISA ⠀•••• 2574',
-    866.99
-  ),
-  createOrder(
-    2,
-    '16 Mar, 2019',
-    'Tom Scholz',
-    'Boston, MA',
-    'MC ⠀•••• 1253',
-    100.81
-  ),
-  createOrder(
-    3,
-    '16 Mar, 2019',
-    'Michael Jackson',
-    'Gary, IN',
-    'AMEX ⠀•••• 2000',
-    654.39
-  ),
-  createOrder(
-    4,
-    '15 Mar, 2019',
-    'Bruce Springsteen',
-    'Long Branch, NJ',
-    'VISA ⠀•••• 5919',
-    212.79
-  ),
-];
+const Progress: React.FC<ProgressProps> = (props) => {
+  const classes = useStyles();
+  return (
+    <div className={classes.loading}>
+      {props.loading ? <LinearProgress /> : null}
+    </div>
+  );
+};
 
 // tslint:disable-next-line variable-name
 export const Index: NextPage = () => {
   const classes = useStyles();
+  const query = useQuery(
+    'dashboard',
+    async (): Promise<DashBoardApiResponse> => {
+      const res = await fetch('/api/dashboard');
+      await sleep(3000);
+      return res.json();
+    }
+  );
 
   const [authState, setAuthState] = React.useState<AuthState>();
   const [user, setUser] = React.useState<User | undefined>();
+
+  const chartData = query.data?.chart ?? [];
+  const deposits = query.data?.deposits ?? { amount: 0, date: '' };
+  const orders = query.data?.orders ?? [];
 
   React.useEffect(() => {
     return onAuthUIStateChange((nextAuthState, authData) => {
@@ -118,23 +75,24 @@ export const Index: NextPage = () => {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   return authState === AuthState.SignedIn && user ? (
     <>
+      <Progress loading={query.isLoading} />
       <Grid container spacing={3}>
         {/* Chart */}
         <Grid item xs={12} md={8} lg={9}>
           <Paper className={fixedHeightPaper}>
-            <Chart data={chartData} />
+            <Chart loading={query.isLoading} data={chartData} />
           </Paper>
         </Grid>
         {/* Recent Deposits */}
         <Grid item xs={12} md={4} lg={3}>
           <Paper className={fixedHeightPaper}>
-            <Deposits {...deposits} />
+            <Deposits {...deposits} loading={query.isLoading} />
           </Paper>
         </Grid>
         {/* Recent Orders */}
         <Grid item xs={12}>
           <Paper className={classes.paper}>
-            <Orders orders={orders} />
+            <Orders orders={orders} loading={query.isLoading} />
           </Paper>
         </Grid>
       </Grid>
