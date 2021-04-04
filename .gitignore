@@ -7,3 +7,4 @@ out
 .env
 cypress/screenshots/
 .DS_Store
+.env.local

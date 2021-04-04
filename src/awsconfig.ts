@@ -1,3 +1,5 @@
+import { Constant } from './constant';
+
 export const awsconfig = {
   Auth: {
     // REQUIRED only for Federated Authentication - Amazon Cognito Identity Pool ID
@@ -11,10 +13,10 @@ export const awsconfig = {
     // identityPoolRegion: 'XX-XXXX-X',
 
     // OPTIONAL - Amazon Cognito User Pool ID
-    userPoolId: process.env.cognitoUserPoolId,
+    userPoolId: Constant.cognitoUserPoolId,
 
     // OPTIONAL - Amazon Cognito Web Client ID (26-char alphanumeric string)
-    userPoolWebClientId: process.env.cognitoUserPoolWebClientId,
+    userPoolWebClientId: Constant.cognitoUserPoolWebClientId,
 
     // OPTIONAL - Enforce user authentication prior to accessing AWS resources or not
     // mandatorySignIn: false,
