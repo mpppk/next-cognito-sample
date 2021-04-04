@@ -16,16 +16,21 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Deposits() {
+export interface DepositsProps {
+  amount: number;
+  date: string;
+}
+
+export const Deposits: React.FC<DepositsProps> = (props) => {
   const classes = useStyles();
   return (
     <React.Fragment>
       <Title>Recent Deposits</Title>
       <Typography component="p" variant="h4">
-        $3,024.00
+        ${props.amount.toLocaleString()}
       </Typography>
       <Typography color="textSecondary" className={classes.depositContext}>
-        on 15 March, 2019
+        on {props.date}
       </Typography>
       <div>
         <Link color="primary" href="#" onClick={preventDefault}>
@@ -34,4 +39,4 @@ export default function Deposits() {
       </div>
     </React.Fragment>
   );
-}
+};
