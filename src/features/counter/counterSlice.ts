@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
+import { sleep } from '../../util';
 
-const sleep = async (ms: number) => await new Promise((r) => setTimeout(r, ms));
 export const incrementLater = createAsyncThunk('incrementLater', async () => {
   await sleep(1000);
   return 1;

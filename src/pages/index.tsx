@@ -13,6 +13,7 @@ import { useQuery } from 'react-query';
 import { DashBoardApiResponse } from './api/dashboard';
 import { sleep } from '../util';
 import { NeedLogin } from '../components/NeedLogin';
+import { useCognito } from '../hooks';
 
 Amplify.configure(awsconfig);
 
@@ -45,6 +46,7 @@ const Progress: React.FC<ProgressProps> = (props) => {
 };
 
 export const Index: NextPage = () => {
+  const { user, authState } = useCognito();
   const classes = useStyles();
   const query = useQuery(
     'dashboard',
@@ -61,7 +63,7 @@ export const Index: NextPage = () => {
 
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   return (
-    <NeedLogin>
+    <NeedLogin user={user} authState={authState}>
       <Progress loading={query.isLoading} />
       <Grid container spacing={3}>
         {/* Chart */}
