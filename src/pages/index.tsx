@@ -1,9 +1,6 @@
 import { NextPage } from 'next';
 import React from 'react';
-import { AuthState, onAuthUIStateChange } from '@aws-amplify/ui-components';
-import { User } from '../models/models';
 import { awsconfig } from '../awsconfig';
-import { AmplifyAuthenticator } from '@aws-amplify/ui-react';
 import { Amplify } from '@aws-amplify/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Box, Grid, LinearProgress, Paper } from '@material-ui/core';
@@ -15,6 +12,8 @@ import { Chart } from '../components/Chart';
 import { useQuery } from 'react-query';
 import { DashBoardApiResponse } from './api/dashboard';
 import { sleep } from '../util';
+import { NeedLogin } from '../components/NeedLogin';
+import { Session } from '../models/models';
 
 Amplify.configure(awsconfig);
 
@@ -46,9 +45,13 @@ const Progress: React.FC<ProgressProps> = (props) => {
   );
 };
 
-// tslint:disable-next-line variable-name
-export const Index: NextPage = () => {
+interface Props {
+  session: Session;
+}
+
+export const Index: NextPage<Props> = (props) => {
   const classes = useStyles();
+  const { user, authState } = props.session;
   const query = useQuery(
     'dashboard',
     async (): Promise<DashBoardApiResponse> => {
@@ -58,23 +61,13 @@ export const Index: NextPage = () => {
     }
   );
 
-  const [authState, setAuthState] = React.useState<AuthState>();
-  const [user, setUser] = React.useState<User | undefined>();
-
   const chartData = query.data?.chart ?? [];
   const deposits = query.data?.deposits ?? { amount: 0, date: '' };
   const orders = query.data?.orders ?? [];
 
-  React.useEffect(() => {
-    return onAuthUIStateChange((nextAuthState, authData) => {
-      setAuthState(nextAuthState);
-      setUser(authData as User | undefined);
-    });
-  }, []);
-
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-  return authState === AuthState.SignedIn && user ? (
-    <>
+  return (
+    <NeedLogin user={user} authState={authState}>
       <Progress loading={query.isLoading} />
       <Grid container spacing={3}>
         {/* Chart */}
@@ -99,9 +92,7 @@ export const Index: NextPage = () => {
       <Box pt={4}>
         <Copyright />
       </Box>
-    </>
-  ) : (
-    <AmplifyAuthenticator />
+    </NeedLogin>
   );
 };
 

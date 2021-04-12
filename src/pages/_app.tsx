@@ -8,6 +8,7 @@ import { wrapper } from '../store';
 import theme from '../theme';
 import { makeStyles } from '@material-ui/core/styles';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { useCognito } from '../hooks';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -30,18 +31,19 @@ const queryClient = new QueryClient();
 // tslint:disable-next-line variable-name
 const WrappedApp: FC<AppProps> = ({ Component, pageProps }) => {
   const classes = useStyles();
+  const session = useCognito();
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <div className={classes.root}>
           {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
           <CssBaseline />
-          <MyAppBar />
+          <MyAppBar user={session.user} />
 
           <main className={classes.content}>
             <div className={classes.appBarSpacer} />
             <Container maxWidth="lg" className={classes.container}>
-              <Component {...pageProps} />
+              <Component {...pageProps} session={session} />
             </Container>
           </main>
         </div>

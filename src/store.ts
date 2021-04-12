@@ -2,9 +2,10 @@ import { createWrapper } from 'next-redux-wrapper';
 import { configureStore } from '@reduxjs/toolkit';
 import counter from './features/counter/counterSlice';
 import { Constant } from './constant';
+import { sessionSlice } from './features/session/sessionSlice';
 
 const store = configureStore({
-  reducer: { counter },
+  reducer: { counter, session: sessionSlice.reducer },
 });
 
 export const wrapper = createWrapper(() => store, {
