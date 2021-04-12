@@ -8,6 +8,9 @@ import * as React from 'react';
 import { useState } from 'react';
 import clsx from 'clsx';
 import { MyDrawer } from './drawer/Drawer';
+import { User } from '../models/models';
+import { Avatar, Button, Link } from '@material-ui/core';
+import ProfileMenu from './ProfileMenu';
 
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
@@ -48,10 +51,80 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
+  avatar: {
+    margin: 10,
+  },
 }));
 
+interface Props {
+  user: User | null;
+}
+
+interface ProfileOrLoginProps {
+  user: User | null;
+}
+
 // tslint:disable-next-line variable-name
-export const MyAppBar: React.FC = (_props) => {
+const LoginButton: React.FunctionComponent = () => {
+  return (
+    <Link href={'/signin'}>
+      <Button color="inherit">Sign In</Button>
+    </Link>
+  );
+};
+
+export interface IProfileButtonProps {
+  user: User;
+  onClickLogout: () => void;
+}
+
+const ProfileButton: React.FunctionComponent<IProfileButtonProps> = (props) => {
+  const classes = useStyles();
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const handleClickProfileButton = (e: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(e.currentTarget);
+  };
+  const setNullAnchorEl = () => setAnchorEl(null);
+  const handleClickLogout = () => {
+    setNullAnchorEl();
+    props.onClickLogout();
+  };
+
+  return (
+    <div>
+      <Button
+        aria-controls="profile-menu"
+        aria-haspopup="true"
+        color="inherit"
+        onClick={handleClickProfileButton}
+      >
+        <Avatar
+          aria-label="user profile avatar"
+          alt="Avatar Icon"
+          // src={user.photoURL}
+          className={classes.avatar}
+        />
+      </Button>
+      <ProfileMenu
+        anchorEl={anchorEl}
+        onClickLogout={handleClickLogout}
+        onClose={setNullAnchorEl}
+      />
+    </div>
+  );
+};
+
+const ProfileOrLogin: React.FC<ProfileOrLoginProps> = (props) => {
+  if (props.user === null) {
+    return <LoginButton />;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const emptyHandler = () => {};
+  return <ProfileButton user={props.user} onClickLogout={emptyHandler} />;
+};
+
+export const MyAppBar: React.FC<Props> = (props) => {
   const classes = useStyles(undefined);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const handleDrawer = (open: boolean) => () => setDrawerOpen(open);
@@ -84,6 +157,7 @@ export const MyAppBar: React.FC = (_props) => {
           >
             Dashboard
           </Typography>
+          <ProfileOrLogin user={props.user} />
         </Toolbar>
       </AppBar>
       <MyDrawer open={isDrawerOpen} onClose={handleDrawer(false)} />

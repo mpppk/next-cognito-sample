@@ -13,7 +13,7 @@ import { useQuery } from 'react-query';
 import { DashBoardApiResponse } from './api/dashboard';
 import { sleep } from '../util';
 import { NeedLogin } from '../components/NeedLogin';
-import { useCognito } from '../hooks';
+import { Session } from '../models/models';
 
 Amplify.configure(awsconfig);
 
@@ -45,9 +45,13 @@ const Progress: React.FC<ProgressProps> = (props) => {
   );
 };
 
-export const Index: NextPage = () => {
-  const { user, authState } = useCognito();
+interface Props {
+  session: Session;
+}
+
+export const Index: NextPage<Props> = (props) => {
   const classes = useStyles();
+  const { user, authState } = props.session;
   const query = useQuery(
     'dashboard',
     async (): Promise<DashBoardApiResponse> => {
