@@ -11,6 +11,7 @@ import { MyDrawer } from './drawer/Drawer';
 import { User } from '../models/models';
 import { Avatar, Button, Link } from '@material-ui/core';
 import ProfileMenu from './ProfileMenu';
+import { Auth } from '@aws-amplify/auth';
 
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
@@ -120,8 +121,10 @@ const ProfileOrLogin: React.FC<ProfileOrLoginProps> = (props) => {
     return <LoginButton />;
   }
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const emptyHandler = () => {};
-  return <ProfileButton user={props.user} onClickLogout={emptyHandler} />;
+  const handleClickLogout = async () => {
+    await Auth.signOut();
+  };
+  return <ProfileButton user={props.user} onClickLogout={handleClickLogout} />;
 };
 
 export const MyAppBar: React.FC<Props> = (props) => {
