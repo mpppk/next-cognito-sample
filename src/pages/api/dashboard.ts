@@ -85,7 +85,7 @@ const orders = [
 export default function handler(
   _req: NextApiRequest,
   res: NextApiResponse<DashBoardApiResponse>
-) {
+): void {
   const body = {
     chart: chartData,
     orders,

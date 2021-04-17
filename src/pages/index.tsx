@@ -1,7 +1,5 @@
 import { NextPage } from 'next';
 import React from 'react';
-import { awsconfig } from '../awsconfig';
-import { Amplify } from '@aws-amplify/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Box, Grid, LinearProgress, Paper } from '@material-ui/core';
 import { Deposits } from '../components/Deposits';
@@ -14,8 +12,6 @@ import { DashBoardApiResponse } from './api/dashboard';
 import { sleep } from '../util';
 import { NeedLogin } from '../components/NeedLogin';
 import { Session } from '../models/models';
-
-Amplify.configure(awsconfig);
 
 const useStyles = makeStyles((theme) => ({
   paper: {
