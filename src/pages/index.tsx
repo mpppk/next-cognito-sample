@@ -12,6 +12,7 @@ import { DashBoardApiResponse } from './api/dashboard';
 import { sleep } from '../util';
 import { NeedLogin } from '../components/NeedLogin';
 import { Session } from '../models/models';
+import { useAppSelector } from '../hooks';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -47,7 +48,9 @@ interface Props {
 
 export const Index: NextPage<Props> = (props) => {
   const classes = useStyles();
-  const { user, authState } = props.session;
+  const isCheckedSignInState = useAppSelector(
+    (s) => s.session.isCheckedSignInState
+  );
   const query = useQuery(
     'dashboard',
     async (): Promise<DashBoardApiResponse> => {
@@ -63,7 +66,10 @@ export const Index: NextPage<Props> = (props) => {
 
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   return (
-    <NeedLogin user={user} authState={authState}>
+    <NeedLogin
+      session={props.session}
+      isCheckedSignInState={isCheckedSignInState}
+    >
       <Progress loading={query.isLoading} />
       <Grid container spacing={3}>
         {/* Chart */}

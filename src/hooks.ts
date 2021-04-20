@@ -2,12 +2,9 @@ import React, { useMemo } from 'react';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { ActionCreatorsMapObject, bindActionCreators } from 'redux';
 import { AppDispatch, RootState } from './store';
-import {
-  AuthStateHandler,
-  onAuthUIStateChange,
-} from '@aws-amplify/ui-components';
-import { Session, User } from './models/models';
+import { Session } from './models/models';
 import { sessionSlice } from './features/session/sessionSlice';
+import { Auth } from '@aws-amplify/auth';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useActions<T extends ActionCreatorsMapObject>(
@@ -30,19 +27,16 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export const useCognito = (): Session => {
   const actions = useActions(sessionSlice.actions);
-  const onChangeAuthState: AuthStateHandler = (nextAuthState, data) => {
-    const payload =
-      data === undefined
-        ? { authState: nextAuthState, user: null }
-        : {
-            authState: nextAuthState,
-            user: { username: (data as User)?.username ?? null },
-          };
-    actions.update(payload);
-  };
-  React.useEffect(() => onAuthUIStateChange(onChangeAuthState), []);
+  React.useEffect(() => {
+    Auth.currentUserInfo().then((userInfo) => {
+      if (userInfo !== null) {
+        actions.update({ user: { username: userInfo.username } });
+      } else {
+        actions.update({ user: null });
+      }
+    });
+  }, []);
   return useAppSelector((s) => ({
     user: s.session.user,
-    authState: s.session.authState,
   }));
 };
