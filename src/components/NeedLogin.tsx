@@ -1,17 +1,26 @@
 import React, { useEffect } from 'react';
-import { AuthState } from '@aws-amplify/ui-components';
 import { Session } from '../models/models';
 import { useRouter } from 'next/router';
 
-export const NeedLogin: React.FC<Session> = (props) => {
-  const isSignedIn = props.authState === AuthState.SignedIn && props.user;
+interface Props {
+  session: Session;
+  isCheckedSignInState: boolean;
+}
+
+export const NeedLogin: React.FC<Props> = (props) => {
   const router = useRouter();
   useEffect(() => {
-    const isSignedIn = props.authState === AuthState.SignedIn && props.user;
-    if (!isSignedIn) {
+    if (props.session.user === null && props.isCheckedSignInState) {
       router.push('/login');
     }
-  }, [props.user, props.authState]);
+  }, [props.session.user, props.isCheckedSignInState]);
 
-  return isSignedIn ? <>{props.children}</> : <span>You need to login</span>;
+  if (props.session.user === null) {
+    return props.isCheckedSignInState ? (
+      <span>You need to login</span>
+    ) : (
+      <span>Checking your login status...</span>
+    );
+  }
+  return <>{props.children}</>;
 };

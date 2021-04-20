@@ -2,24 +2,39 @@ import { NextPage } from 'next';
 import { AmplifyAuthenticator } from '@aws-amplify/ui-react';
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { AuthState } from '@aws-amplify/ui-components';
-import { useAppSelector } from '../hooks';
-import { Amplify } from '@aws-amplify/core';
-import { awsconfig } from '../awsconfig';
-
-Amplify.configure(awsconfig);
+import {
+  AuthStateHandler,
+  onAuthUIStateChange,
+} from '@aws-amplify/ui-components';
+import { useActions, useAppSelector } from '../hooks';
+import { Session, User } from '../models/models';
+import { sessionSlice } from '../features/session/sessionSlice';
 
 export const Login: NextPage = () => {
   const router = useRouter();
-  const authState = useAppSelector((s) => s.session.authState);
+  const user = useAppSelector((s) => s.session.user);
+  const actions = useActions(sessionSlice.actions);
+  const onChangeAuthState: AuthStateHandler = (_nextAuthState, data) => {
+    const payload: Session =
+      data === undefined
+        ? { user: null }
+        : {
+            user: { username: (data as User)?.username ?? null },
+          };
+    actions.update(payload);
+  };
 
   useEffect(() => {
-    if (authState === AuthState.SignedIn) {
+    onAuthUIStateChange(onChangeAuthState);
+  }, []);
+
+  useEffect(() => {
+    if (user !== null) {
       setTimeout(() => router.push('/'), 2000);
     }
-  }, [authState]);
+  }, [user]);
 
-  if (authState === AuthState.SignedIn) {
+  if (user !== null) {
     return (
       <>You already logged in. Moves to the top page after a few seconds...</>
     );

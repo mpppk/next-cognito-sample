@@ -11,7 +11,8 @@ import { MyDrawer } from './drawer/Drawer';
 import { User } from '../models/models';
 import { Avatar, Button, Link } from '@material-ui/core';
 import ProfileMenu from './ProfileMenu';
-import { Auth } from '@aws-amplify/auth';
+import { logout } from '../features/session/sessionSlice';
+import { useDispatch } from 'react-redux';
 
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
@@ -117,12 +118,13 @@ const ProfileButton: React.FunctionComponent<IProfileButtonProps> = (props) => {
 };
 
 const ProfileOrLogin: React.FC<ProfileOrLoginProps> = (props) => {
+  const dispatch = useDispatch();
   if (props.user === null) {
     return <LoginButton />;
   }
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const handleClickLogout = async () => {
-    await Auth.signOut();
+    dispatch(logout());
   };
   return <ProfileButton user={props.user} onClickLogout={handleClickLogout} />;
 };

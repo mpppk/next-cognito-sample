@@ -9,6 +9,10 @@ import theme from '../theme';
 import { makeStyles } from '@material-ui/core/styles';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { useCognito } from '../hooks';
+import { Amplify } from '@aws-amplify/core';
+import { awsconfig } from '../awsconfig';
+
+Amplify.configure(awsconfig);
 
 const useStyles = makeStyles((theme) => ({
   root: {
