@@ -31,7 +31,7 @@
     "react-query": "3.13.12",
     "react-redux": "7.2.4",
     "recharts": "2.0.9",
-    "redux": "4.0.5",
+    "redux": "4.1.0",
     "typeface-roboto": "1.1.13"
   },
   "devDependencies": {
