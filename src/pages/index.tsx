@@ -7,9 +7,7 @@ import { Orders } from '../components/Orders';
 import { Copyright } from '@material-ui/icons';
 import clsx from 'clsx';
 import { Chart } from '../components/Chart';
-import { useQuery } from 'react-query';
-import { DashBoardApiResponse } from './api/dashboard';
-import { sleep } from '../util';
+import { useDashBoardApiQuery } from './api/dashboard';
 import { NeedLogin } from '../components/NeedLogin';
 import { Session } from '../models/models';
 import { useAppSelector } from '../hooks';
@@ -48,17 +46,23 @@ interface Props {
 
 export const Index: NextPage<Props> = (props) => {
   const classes = useStyles();
-  const isCheckedSignInState = useAppSelector(
-    (s) => s.session.isCheckedSignInState
-  );
-  const query = useQuery(
-    'dashboard',
-    async (): Promise<DashBoardApiResponse> => {
-      const res = await fetch('/api/dashboard');
-      await sleep(3000);
-      return res.json();
-    }
-  );
+  const { isCheckedSignInState } = useAppSelector((s) => {
+    return {
+      isCheckedSignInState: s.session.isCheckedSignInState,
+    };
+  });
+
+  const query = useDashBoardApiQuery();
+
+  if (query.isError) {
+    return (
+      <span>
+        <strong>{query.error.problemDetailsResponse.title}</strong>
+        <br />
+        {query.error.problemDetailsResponse.detail}
+      </span>
+    );
+  }
 
   const chartData = query.data?.chart ?? [];
   const deposits = query.data?.deposits ?? { amount: 0, date: '' };

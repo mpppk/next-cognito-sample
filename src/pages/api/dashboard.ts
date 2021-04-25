@@ -1,6 +1,12 @@
-import { NextApiRequest, NextApiResponse } from 'next';
 import { ChartData } from '../../components/Chart';
 import { Order } from '../../components/Orders';
+import {
+  ApiHandler,
+  getApi,
+  ProblemDetailsResponseError,
+} from '../../models/api';
+import { verifyCognitoAccessToken } from '../../services/jwt';
+import { useApiQuery, UseApiQueryResult } from '../../hooks';
 
 export interface DashBoardApiResponse {
   chart: ChartData[];
@@ -82,14 +88,62 @@ const orders = [
   ),
 ];
 
-export default function handler(
-  _req: NextApiRequest,
-  res: NextApiResponse<DashBoardApiResponse>
-): void {
+const verifyAccessToken = verifyCognitoAccessToken.bind(
+  null,
+  'ap-northeast-1',
+  'ap-northeast-1_zvqoo8kSQ'
+);
+
+const handler: ApiHandler<DashBoardApiResponse> = async (req, res) => {
+  const authorization = req.headers.authorization;
+  if (authorization === undefined) {
+    res.status(403).json({
+      title: 'authorization token is not provided',
+    });
+    return;
+  }
+
+  if (!authorization.startsWith('Bearer ')) {
+    res.status(403).json({
+      title: 'bearer token is needed',
+    });
+    return;
+  }
+
+  const token = authorization.replace('Bearer ', '');
+
+  try {
+    await verifyAccessToken(token, Date.now());
+  } catch (e) {
+    res.status(403).json({
+      title: 'invalid token',
+      detail: e.message,
+    });
+    return;
+  }
+
   const body = {
     chart: chartData,
     orders,
     deposits,
   };
   res.status(200).json(body);
-}
+};
+
+const URL = '/api/dashboard';
+export const getDashBoardApi = async (
+  token: string
+): Promise<DashBoardApiResponse | ProblemDetailsResponseError> => {
+  return await getApi<DashBoardApiResponse>(token, URL);
+};
+
+export const useDashBoardApiQuery = (
+  key = URL
+): UseApiQueryResult<DashBoardApiResponse> => {
+  return useApiQuery<DashBoardApiResponse>([key, {}], async ({ queryKey }) => {
+    const [_key, { token }] = queryKey;
+    return await getDashBoardApi(token);
+  });
+};
+
+export default handler;
