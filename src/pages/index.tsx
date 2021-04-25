@@ -7,15 +7,10 @@ import { Orders } from '../components/Orders';
 import { Copyright } from '@material-ui/icons';
 import clsx from 'clsx';
 import { Chart } from '../components/Chart';
-import { useQuery } from 'react-query';
-import { DashBoardApiResponse } from './api/dashboard';
+import { useDashBoardApiQuery } from './api/dashboard';
 import { NeedLogin } from '../components/NeedLogin';
 import { Session } from '../models/models';
-import { callApi, useAppSelector } from '../hooks';
-import {
-  isProblemDetailsResponseError,
-  ProblemDetailsResponseError,
-} from '../models/api';
+import { useAppSelector } from '../hooks';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -51,30 +46,13 @@ interface Props {
 
 export const Index: NextPage<Props> = (props) => {
   const classes = useStyles();
-  const { session, isCheckedSignInState } = useAppSelector((s) => {
+  const { isCheckedSignInState } = useAppSelector((s) => {
     return {
-      session: s.session.session,
       isCheckedSignInState: s.session.isCheckedSignInState,
     };
   });
 
-  const query = useQuery<DashBoardApiResponse, ProblemDetailsResponseError>(
-    [
-      'dashboard',
-      {
-        token: session.user === null ? null : session.accessToken,
-      },
-    ],
-    async ({ queryKey }): Promise<DashBoardApiResponse> => {
-      const [_key, { token }] = queryKey as [string, { token: string }];
-      const res = await callApi<DashBoardApiResponse>(token, '/api/dashboard');
-      if (isProblemDetailsResponseError(res)) {
-        throw res;
-      }
-      return res;
-    },
-    { enabled: session.user !== null }
-  );
+  const query = useDashBoardApiQuery();
 
   if (query.isError) {
     return (

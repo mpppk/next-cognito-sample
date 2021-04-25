@@ -1,7 +1,12 @@
 import { ChartData } from '../../components/Chart';
 import { Order } from '../../components/Orders';
-import { ApiHandler } from '../../models/api';
+import {
+  ApiHandler,
+  getApi,
+  ProblemDetailsResponseError,
+} from '../../models/api';
 import { verifyCognitoAccessToken } from '../../services/jwt';
+import { useApiQuery, UseApiQueryResult } from '../../hooks';
 
 export interface DashBoardApiResponse {
   chart: ChartData[];
@@ -123,6 +128,22 @@ const handler: ApiHandler<DashBoardApiResponse> = async (req, res) => {
     deposits,
   };
   res.status(200).json(body);
+};
+
+const URL = '/api/dashboard';
+export const getDashBoardApi = async (
+  token: string
+): Promise<DashBoardApiResponse | ProblemDetailsResponseError> => {
+  return await getApi<DashBoardApiResponse>(token, URL);
+};
+
+export const useDashBoardApiQuery = (
+  key = URL
+): UseApiQueryResult<DashBoardApiResponse> => {
+  return useApiQuery<DashBoardApiResponse>([key, {}], async ({ queryKey }) => {
+    const [_key, { token }] = queryKey;
+    return await getDashBoardApi(token);
+  });
 };
 
 export default handler;
