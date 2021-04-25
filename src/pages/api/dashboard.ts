@@ -1,6 +1,7 @@
 import { ChartData } from '../../components/Chart';
 import { Order } from '../../components/Orders';
 import { ApiHandler } from '../../models/api';
+import { verifyCognitoAccessToken } from '../../services/jwt';
 
 export interface DashBoardApiResponse {
   chart: ChartData[];
@@ -82,11 +83,36 @@ const orders = [
   ),
 ];
 
-const handler: ApiHandler<DashBoardApiResponse> = (req, res) => {
+const verifyAccessToken = verifyCognitoAccessToken.bind(
+  null,
+  'ap-northeast-1',
+  'ap-northeast-1_zvqoo8kSQ'
+);
+
+const handler: ApiHandler<DashBoardApiResponse> = async (req, res) => {
   const authorization = req.headers.authorization;
   if (authorization === undefined) {
     res.status(403).json({
       title: 'authorization token is not provided',
+    });
+    return;
+  }
+
+  if (!authorization.startsWith('Bearer ')) {
+    res.status(403).json({
+      title: 'bearer token is needed',
+    });
+    return;
+  }
+
+  const token = authorization.replace('Bearer ', '');
+
+  try {
+    await verifyAccessToken(token, Date.now());
+  } catch (e) {
+    res.status(403).json({
+      title: 'invalid token',
+      detail: e.message,
     });
     return;
   }

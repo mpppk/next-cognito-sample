@@ -56,27 +56,45 @@ export const Index: NextPage<Props> = (props) => {
     };
   });
 
-  const headers = new Headers();
-  if (session.user !== null) {
-    headers.append('Authorization', 'Bearer ' + session.accessToken);
-  }
-
-  const req = new Request('/api/dashboard', { headers });
   const query = useQuery<DashBoardApiResponse, ProblemDetailsResponse>(
-    'dashboard',
-    async (): Promise<DashBoardApiResponse> => {
-      const res = await fetch(req);
-      await sleep(3000);
-      if (res.status !== 200) {
-        throw new Error(await res.json());
+    [
+      'dashboard',
+      {
+        token: session.user === null ? null : session.accessToken,
+      },
+    ],
+    async ({ queryKey }): Promise<DashBoardApiResponse> => {
+      const [_key, { token }] = queryKey as [string, { token: string | null }];
+      const headers = new Headers();
+      if (token !== null) {
+        headers.append('Authorization', 'Bearer ' + token);
       }
+
+      const req = new Request('/api/dashboard', { headers });
+
+      let res: Response;
+      try {
+        res = await fetch(req);
+      } catch (e) {
+        throw { title: e.message };
+      }
+      if (res.status !== 200) {
+        throw await res.json();
+      }
+      await sleep(3000);
       return res.json();
     },
     { enabled: session.user !== null }
   );
 
   if (query.isError) {
-    return <span>error occurred: {query.error.title}</span>;
+    return (
+      <span>
+        <strong>{query.error.title}</strong>
+        <br />
+        {query.error.detail}
+      </span>
+    );
   }
 
   const chartData = query.data?.chart ?? [];
