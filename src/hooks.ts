@@ -28,15 +28,20 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 export const useCognito = (): Session => {
   const actions = useActions(sessionSlice.actions);
   React.useEffect(() => {
-    Auth.currentUserInfo().then((userInfo) => {
-      if (userInfo !== null) {
-        actions.update({ user: { username: userInfo.username } });
-      } else {
+    Auth.currentAuthenticatedUser().then(
+      (authenticatedUser) => {
+        actions.update({
+          user: { username: authenticatedUser.getUsername() },
+          accessToken: authenticatedUser
+            .getSignInUserSession()
+            .getAccessToken()
+            .getJwtToken(),
+        });
+      },
+      () => {
         actions.update({ user: null });
       }
-    });
+    );
   }, []);
-  return useAppSelector((s) => ({
-    user: s.session.user,
-  }));
+  return useAppSelector((s) => s.session.session);
 };

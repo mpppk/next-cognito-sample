@@ -2,6 +2,9 @@ export interface User {
   username: string;
 }
 
-export interface Session {
-  user: User | null;
-}
+export type Session =
+  | {
+      user: User;
+      accessToken: string;
+    }
+  | { user: null };

@@ -9,18 +9,24 @@ import {
 import { useActions, useAppSelector } from '../hooks';
 import { Session, User } from '../models/models';
 import { sessionSlice } from '../features/session/sessionSlice';
+import { CognitoUser } from 'amazon-cognito-identity-js';
 
 export const Login: NextPage = () => {
   const router = useRouter();
-  const user = useAppSelector((s) => s.session.user);
+  const user = useAppSelector((s) => s.session.session.user);
   const actions = useActions(sessionSlice.actions);
   const onChangeAuthState: AuthStateHandler = (_nextAuthState, data) => {
-    const payload: Session =
-      data === undefined
-        ? { user: null }
-        : {
-            user: { username: (data as User)?.username ?? null },
-          };
+    const cognitoUser = data as CognitoUser | undefined;
+    let payload: Session = { user: null };
+    if (cognitoUser !== undefined) {
+      const signInSession = cognitoUser.getSignInUserSession();
+      if (signInSession !== null) {
+        payload = {
+          user: { username: (data as User)?.username ?? null },
+          accessToken: signInSession.getAccessToken().getJwtToken(),
+        };
+      }
+    }
     actions.update(payload);
   };
 

@@ -13,6 +13,7 @@ import { sleep } from '../util';
 import { NeedLogin } from '../components/NeedLogin';
 import { Session } from '../models/models';
 import { useAppSelector } from '../hooks';
+import { ProblemDetailsResponse } from '../models/api';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -48,17 +49,35 @@ interface Props {
 
 export const Index: NextPage<Props> = (props) => {
   const classes = useStyles();
-  const isCheckedSignInState = useAppSelector(
-    (s) => s.session.isCheckedSignInState
-  );
-  const query = useQuery(
+  const { session, isCheckedSignInState } = useAppSelector((s) => {
+    return {
+      session: s.session.session,
+      isCheckedSignInState: s.session.isCheckedSignInState,
+    };
+  });
+
+  const headers = new Headers();
+  if (session.user !== null) {
+    headers.append('Authorization', 'Bearer ' + session.accessToken);
+  }
+
+  const req = new Request('/api/dashboard', { headers });
+  const query = useQuery<DashBoardApiResponse, ProblemDetailsResponse>(
     'dashboard',
     async (): Promise<DashBoardApiResponse> => {
-      const res = await fetch('/api/dashboard');
+      const res = await fetch(req);
       await sleep(3000);
+      if (res.status !== 200) {
+        throw new Error(await res.json());
+      }
       return res.json();
-    }
+    },
+    { enabled: session.user !== null }
   );
+
+  if (query.isError) {
+    return <span>error occurred: {query.error.title}</span>;
+  }
 
   const chartData = query.data?.chart ?? [];
   const deposits = query.data?.deposits ?? { amount: 0, date: '' };

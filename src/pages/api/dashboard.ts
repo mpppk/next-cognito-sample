@@ -1,6 +1,6 @@
-import { NextApiRequest, NextApiResponse } from 'next';
 import { ChartData } from '../../components/Chart';
 import { Order } from '../../components/Orders';
+import { ApiHandler } from '../../models/api';
 
 export interface DashBoardApiResponse {
   chart: ChartData[];
@@ -82,14 +82,21 @@ const orders = [
   ),
 ];
 
-export default function handler(
-  _req: NextApiRequest,
-  res: NextApiResponse<DashBoardApiResponse>
-): void {
+const handler: ApiHandler<DashBoardApiResponse> = (req, res) => {
+  const authorization = req.headers.authorization;
+  if (authorization === undefined) {
+    res.status(403).json({
+      title: 'authorization token is not provided',
+    });
+    return;
+  }
+
   const body = {
     chart: chartData,
     orders,
     deposits,
   };
   res.status(200).json(body);
-}
+};
+
+export default handler;
