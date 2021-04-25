@@ -9,11 +9,13 @@ import clsx from 'clsx';
 import { Chart } from '../components/Chart';
 import { useQuery } from 'react-query';
 import { DashBoardApiResponse } from './api/dashboard';
-import { sleep } from '../util';
 import { NeedLogin } from '../components/NeedLogin';
 import { Session } from '../models/models';
-import { useAppSelector } from '../hooks';
-import { ProblemDetailsResponse } from '../models/api';
+import { callApi, useAppSelector } from '../hooks';
+import {
+  isProblemDetailsResponseError,
+  ProblemDetailsResponseError,
+} from '../models/api';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -56,7 +58,7 @@ export const Index: NextPage<Props> = (props) => {
     };
   });
 
-  const query = useQuery<DashBoardApiResponse, ProblemDetailsResponse>(
+  const query = useQuery<DashBoardApiResponse, ProblemDetailsResponseError>(
     [
       'dashboard',
       {
@@ -64,25 +66,12 @@ export const Index: NextPage<Props> = (props) => {
       },
     ],
     async ({ queryKey }): Promise<DashBoardApiResponse> => {
-      const [_key, { token }] = queryKey as [string, { token: string | null }];
-      const headers = new Headers();
-      if (token !== null) {
-        headers.append('Authorization', 'Bearer ' + token);
+      const [_key, { token }] = queryKey as [string, { token: string }];
+      const res = await callApi<DashBoardApiResponse>(token, '/api/dashboard');
+      if (isProblemDetailsResponseError(res)) {
+        throw res;
       }
-
-      const req = new Request('/api/dashboard', { headers });
-
-      let res: Response;
-      try {
-        res = await fetch(req);
-      } catch (e) {
-        throw { title: e.message };
-      }
-      if (res.status !== 200) {
-        throw await res.json();
-      }
-      await sleep(3000);
-      return res.json();
+      return res;
     },
     { enabled: session.user !== null }
   );
@@ -90,9 +79,9 @@ export const Index: NextPage<Props> = (props) => {
   if (query.isError) {
     return (
       <span>
-        <strong>{query.error.title}</strong>
+        <strong>{query.error.problemDetailsResponse.title}</strong>
         <br />
-        {query.error.detail}
+        {query.error.problemDetailsResponse.detail}
       </span>
     );
   }

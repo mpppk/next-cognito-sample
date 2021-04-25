@@ -5,6 +5,7 @@ import { AppDispatch, RootState } from './store';
 import { Session } from './models/models';
 import { sessionSlice } from './features/session/sessionSlice';
 import { Auth } from '@aws-amplify/auth';
+import { ProblemDetailsResponseError } from './models/api';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useActions<T extends ActionCreatorsMapObject>(
@@ -44,4 +45,28 @@ export const useCognito = (): Session => {
     );
   }, []);
   return useAppSelector((s) => s.session.session);
+};
+
+const fetchWithToken = async (token: string, url: string) => {
+  const headers = new Headers({
+    Authorization: 'Bearer ' + token,
+  });
+  const req = new Request(url, { headers });
+  return await fetch(req);
+};
+
+export const callApi = async <ApiResponse>(
+  token: string,
+  url: string
+): Promise<ApiResponse | ProblemDetailsResponseError> => {
+  let res: Response;
+  try {
+    res = await fetchWithToken(token, url);
+  } catch (e) {
+    return new ProblemDetailsResponseError({ title: e.message });
+  }
+  if (res.status !== 200) {
+    return new ProblemDetailsResponseError(await res.json());
+  }
+  return res.json();
 };
