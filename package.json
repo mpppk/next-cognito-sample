@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@testing-library/react": "11.2.6",
-    "@types/jest": "26.0.22",
+    "@types/jest": "26.0.23",
     "@types/jsonwebtoken": "8.5.1",
     "@types/jwk-to-pem": "2.0.0",
     "@types/react": "17.0.3",
