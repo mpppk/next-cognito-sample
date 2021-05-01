@@ -2,6 +2,7 @@ next-cognito-sample:
   component: '@sls-next/serverless-component@1.18.0'
   inputs:
     cloudfront:
+      distributionId: E3TOCEEJL0F09G
       api/*:
         forward:
           headers: [Authorization]
