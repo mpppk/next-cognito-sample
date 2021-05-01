@@ -8,3 +8,5 @@ out
 cypress/screenshots/
 .DS_Store
 .env.local
+.serverless
+.serverless_nextjs
