@@ -1,0 +1,7 @@
+next-cognito-sample:
+  component: '@sls-next/serverless-component@1.18.0'
+  inputs:
+    cloudfront:
+      api/*:
+        forward:
+          headers: [Authorization]
